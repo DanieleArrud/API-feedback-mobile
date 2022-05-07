@@ -4,13 +4,13 @@ import { FeedbacksRepository } from "../repositories/feedbacks-repositories";
 interface SubmitFeedbackUseCaseRequest{
     type: string;
     comment: string;
-    screenshot?: string;
+    screenshot?: string
 }
 
 export class SubmitFeedbackUseCase{
 
     constructor(
-        private feedbacksRepository: FeedbacksRepository,
+        private feedbackRepository: FeedbacksRepository,
         private mailAdapter: MailAdapter,
         ){}
         
@@ -18,11 +18,11 @@ export class SubmitFeedbackUseCase{
         
     const { type, comment, screenshot } = request;
 
-    const feedback = await this.feedbacksRepository.create({
-        type,
-        comment,
-        screenshot,
-    })
+    // const feedback = await this.feedbackRepository.create({
+    //     type,
+    //     comment,
+    //     screenshot,
+    // })
 
     if(!type){
         throw new Error('Type is required');
@@ -36,20 +36,21 @@ export class SubmitFeedbackUseCase{
         throw new Error('Invalid screenshot format')
     }
 
-    await this.feedbacksRepository.create({
+    await this.feedbackRepository.create({
         type,
         comment,
         screenshot,
-    })
+    });
 
-    this.mailAdapter.sendMail({
+    await this.mailAdapter.sendMail({
             subject: 'Novo feedback',
             body: [
-                `<div style="font-family: sans-serif; font-size:16px; color: #111 ">`,
+                `<div style="font-family: sans-serif; font-size:16px; color: #111; ">`,
                 `<p>Tiago do feedback: ${type}</p>`,
                 `<p>Comentário: ${comment}</p>`,
+                `<img src= "${screenshot}"/>`, 
                 `</div>`
-            ].join('\n')
+            ].join('\n'),
         })
 
     }
